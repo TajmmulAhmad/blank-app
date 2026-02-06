@@ -1,6 +1,5 @@
 import datetime
 
-import pymssql
 import streamlit as st
 
 st.set_page_config(page_title="SQL Server Desktop Client", page_icon="🗄️", layout="wide")
@@ -38,7 +37,22 @@ with param_col2:
 start_dt = datetime.datetime.combine(start_date, start_time)
 end_dt = datetime.datetime.combine(end_date, end_time)
 
-run_button = st.button("Run procedure", type="primary")
+try:
+    import pymssql
+except ModuleNotFoundError:  # pragma: no cover - runtime guard for missing dependency
+    pymssql = None
+
+run_button = st.button(
+    "Run procedure",
+    type="primary",
+    disabled=pymssql is None,
+)
+
+if pymssql is None:
+    st.warning(
+        "The `pymssql` dependency is not installed. Run `pip install -r requirements.txt` "
+        "to enable SQL Server connectivity."
+    )
 
 if run_button:
     with st.spinner("Connecting and running stored procedure..."):
